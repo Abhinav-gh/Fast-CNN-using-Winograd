@@ -90,7 +90,7 @@ function fillMatrix(matrix, elementId, className, randomize = false) {
                 }
             }
             cells[idx].textContent = typeof matrix[i][j] === 'number' ?
-                (Number.isInteger(matrix[i][j]) ? matrix[i][j] : matrix[i][j].toFixed(1)) :
+                (Number.isInteger(matrix[i][j]) ? matrix[i][j] : matrix[i][j].toFixed(2)) :
                 matrix[i][j];
             cells[idx].className = `cell ${className}`;
             idx++;
@@ -226,7 +226,8 @@ function updateStepDisplay() {
             document.getElementById('transformedMatrices').style.display = 'flex';
 
             // Calculate transformed input: U = B^T * input * B
-            transformedInput = matrixMultiply(transpose(B), matrixMultiply(input, B));
+            const temp3 = matrixMultiply(B, input);
+            transformedInput = matrixMultiply(temp3, transpose(B));
             fillMatrix(transformedInput, 'transformedInputMatrix', 'input');
             break;
 
@@ -252,7 +253,8 @@ function updateStepDisplay() {
                 elementwiseProduct[i] = [];
                 for (let j = 0; j < 4; j++) {
                     const val = transformedInput[i][j] * transformedFilter[i][j];
-                    elementwiseProduct[i][j] = Math.round(val * 1000) / 1000;
+                    // elementwiseProduct[i][j] = Math.round(val * 1000) / 1000;
+                    elementwiseProduct[i][j] = val;
                 }
             }
             fillMatrix(elementwiseProduct, 'elementwiseProductMatrix', 'output');
