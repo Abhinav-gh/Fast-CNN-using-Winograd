@@ -1,0 +1,141 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.matrix-row {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.matrix-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.matrix-label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.matrix {
+    display: grid;
+    gap: 2px;
+    background: #eee;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.cell {
+    width: 40px;
+    height: 40px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc;
+    transition: all 0.3s;
+    font-size: 14px;
+}
+
+.active {
+    background: #90EE90 !important;
+}
+
+.input {
+    background: #ADD8E6;
+}
+
+.filter {
+    background: #FFB6C1;
+}
+
+.output {
+    background: #D8BFD8;
+}
+
+.transform {
+    background: #FFDAB9;
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+button {
+    padding: 10px 20px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.explanation {
+    margin: 20px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    max-width: 800px;
+    text-align: center;
+}
+
+.step-detail {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    text-align: left;
+}
+
+.highlight {
+    color: #e91e63;
+    font-weight: bold;
+}
+
+.formula {
+    margin: 10px 0;
+    font-family: monospace;
+    background-color: #f5f5f5;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.animation-box {
+    border: 2px solid #4CAF50;
+    padding: 10px;
+    margin-top: 20px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.kernel-animation {
+    position: relative;
+    margin: 20px 0;
+}
+
+.kernel-highlight {
+    position: absolute;
+    border: 3px solid red;
+    background: rgba(255, 0, 0, 0.1);
+    pointer-events: none;
+}
