@@ -1,84 +1,273 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>Winograd Convolution Visualization</title>
-    <link rel="stylesheet" href="winograd_vis.css"> </head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Winograd Convolution Algorithm Visualization</title>
+    <style>
+        .container {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
 
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            gap: 10px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .explanation-box {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .explanation-box h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .formula {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+
+        .matrix-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .matrix-container {
+            min-width: 200px;  /* Prevents layout shifting */
+            margin: 10px;
+        }
+
+        .matrix-container h3 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .matrix {
+            display: grid;
+            gap: 2px;
+            background-color: #f0f0f0;
+            padding: 3px;
+            border-radius: 4px;
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+            font-size: 14px;
+            border-radius: 2px;
+        }
+
+        .input {
+            background-color: #e3f2fd;
+        }
+
+        .filter {
+            background-color: #ffebee;
+        }
+
+        .output {
+            background-color: #e8f5e9;
+        }
+
+        .transform {
+            background-color: #fff9c4;
+        }
+
+        .active {
+            box-shadow: 0 0 0 2px #ff5722;
+            background-color: #fff3e0;
+            font-weight: bold;
+            z-index: 1;
+        }
+
+        .animation-container {
+            position: relative;
+        }
+
+        #kernelHighlight {
+            position: absolute;
+            border: 3px dashed #ff5722;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        #transformationStatus {
+            margin-left: 10px;
+            padding: 8px;
+            color: #333;
+            font-style: italic;
+        }
+    </style>
+</head>
 <body>
     <div class="container">
-        <h1>Winograd Convolution Visualization</h1>
-
+        <h1>Winograd Convolution Algorithm Visualization</h1>
+        
         <div class="controls">
-            <button onclick="reset()">Reset</button>
-            <button onclick="prevStep()">Previous Step</button>
-            <button onclick="nextStep()">Next Step</button>
+            <button id="prevBtn">Previous Step</button>
+            <button id="nextBtn">Next Step</button>
+            <button id="resetBtn">Reset</button>
+            <button id="randomizeBtn">Randomize Data</button>
         </div>
-
-        <div class="explanation" id="explanation"></div>
-        <div class="step-detail" id="stepDetail"></div>
-
-        <div class="matrix-row" id="originalMatrices">
-            <div class="matrix-container">
-                <div class="matrix-label">Input (4x4)</div>
-                <div class="matrix" id="inputMatrix"></div>
-            </div>
-            <div class="matrix-container">
-                <div class="matrix-label">Filter (3x3)</div>
-                <div class="matrix" id="filterMatrix"></div>
-            </div>
-            <div class="matrix-container">
-                <div class="matrix-label">Output (2x2)</div>
-                <div class="matrix" id="outputMatrix"></div>
-            </div>
+        
+        <div class="explanation-box">
+            <h2 id="explanation">Step 1: Original input (4x4) and filter (3x3)</h2>
+            <p id="stepDetail"></p>
         </div>
-
-        <div class="matrix-row" id="transformMatrices" style="display: none;">
+        
+        <!-- Original Matrices -->
+        <div id="originalMatrices" class="matrix-row">
             <div class="matrix-container">
-                <div class="matrix-label">B Matrix (4x4)</div>
-                <div class="matrix" id="bMatrix"></div>
+                <h3>Input (4x4)</h3>
+                <div id="inputMatrix" class="matrix"></div>
             </div>
+            
             <div class="matrix-container">
-                <div class="matrix-label">G Matrix (4x3)</div>
-                <div class="matrix" id="gMatrix"></div>
+                <h3>Filter (3x3)</h3>
+                <div id="filterMatrix" class="matrix"></div>
             </div>
+            
             <div class="matrix-container">
-                <div class="matrix-label">A Matrix (2x4)</div>
-                <div class="matrix" id="aMatrix"></div>
+                <h3>Output (2x2)</h3>
+                <div id="outputMatrix" class="matrix"></div>
             </div>
         </div>
-
-        <div class="matrix-row" id="transformedMatrices" style="display: none;">
+        
+        <!-- Transformation Matrices -->
+        <div id="transformMatrices" class="matrix-row" style="display: none;">
             <div class="matrix-container">
-                <div class="matrix-label">Transformed Input (4x4)</div>
-                <div class="matrix" id="transformedInputMatrix"></div>
+                <h3>B Matrix (4x4)</h3>
+                <div id="bMatrix" class="matrix"></div>
             </div>
+            
             <div class="matrix-container">
-                <div class="matrix-label">Transformed Filter (4x4)</div>
-                <div class="matrix" id="transformedFilterMatrix"></div>
+                <h3>G Matrix (4x3)</h3>
+                <div id="gMatrix" class="matrix"></div>
+            </div>
+            
+            <div class="matrix-container">
+                <h3>A Matrix (2x4)</h3>
+                <div id="aMatrix" class="matrix"></div>
             </div>
         </div>
-
-        <div class="matrix-row" id="productMatrix" style="display: none;">
+        
+        <!-- Transformed Matrices -->
+        <div id="transformedMatrices" class="matrix-row" style="display: none;">
             <div class="matrix-container">
-                <div class="matrix-label">Element-wise Product (4x4)</div>
-                <div class="matrix" id="elementwiseProductMatrix"></div>
+                <h3>Transformed Input</h3>
+                <div id="transformedInputMatrix" class="matrix"></div>
+            </div>
+            
+            <div class="matrix-container">
+                <h3>Transformed Filter</h3>
+                <div id="transformedFilterMatrix" class="matrix"></div>
             </div>
         </div>
-
-        <div class="animation-box" id="convAnimation" style="display: none;">
-            <div class="matrix-label">Convolution Animation</div>
-            <div class="kernel-animation" id="kernelAnimation">
-                <div class="matrix" id="animInputMatrix"></div>
-                <div class="kernel-highlight" id="kernelHighlight"></div>
-            </div>
+        
+        <!-- Intermediate matrices for animation -->
+        <div id="intermediateMatrices" class="matrix-row" style="display: none;">
             <div class="matrix-container">
-                <div class="matrix-label">Output Being Filled</div>
-                <div class="matrix" id="animOutputMatrix"></div>
+                <h3>B<sup>T</sup> Matrix</h3>
+                <div id="bMatrixT" class="matrix"></div>
             </div>
+            
+            <div class="matrix-container">
+                <h3>B<sup>T</sup> × Input</h3>
+                <div id="interBTInput" class="matrix"></div>
+            </div>
+            
+            <div class="matrix-container">
+                <h3>G<sup>T</sup> Matrix</h3>
+                <div id="gMatrixT" class="matrix"></div>
+            </div>
+            
+            <div class="matrix-container">
+                <h3>Filter × G<sup>T</sup></h3>
+                <div id="interFilterGT" class="matrix"></div>
+            </div>
+        </div>
+        
+        <!-- Element-wise Product Matrix -->
+        <div id="productMatrix" class="matrix-row" style="display: none;">
+            <div class="matrix-container">
+                <h3>Element-wise Product</h3>
+                <div id="elementwiseProductMatrix" class="matrix"></div>
+            </div>
+        </div>
+        
+        <!-- Inverse Transform Matrices -->
+        <div id="inverseTransformMatrices" class="matrix-row" style="display: none;">
+            <div class="matrix-container">
+                <h3>A<sup>T</sup> Matrix</h3>
+                <div id="aMatrixT" class="matrix"></div>
+            </div>
+            
+            <div class="matrix-container">
+                <h3>A × Product</h3>
+                <div id="interAProduct" class="matrix"></div>
+            </div>
+        </div>
+        
+        <!-- Direct Convolution Animation -->
+        <div id="convAnimation" class="matrix-row" style="display: none;">
+            <div class="matrix-container">
+                <h3>Direct Convolution</h3>
+                <div class="animation-container">
+                    <div id="animInputMatrix" class="matrix"></div>
+                    <div id="kernelHighlight"></div>
+                </div>
+            </div>
+            
+            <div class="matrix-container">
+                <h3>Convolution Result</h3>
+                <div id="animOutputMatrix" class="matrix"></div>
+            </div>
+        </div>
+        
+        <!-- Animation Controls -->
+        <div id="animationControls" class="controls" style="display: none;">
+            <button id="animateBtn">Animate Transformation</button>
+            <div id="transformationStatus"></div>
         </div>
     </div>
-
-    <script src="script.js"></script> </body>
-
-</html>
+    <!-- Add script2 file -->
+    <script src="script2.js"></script>
