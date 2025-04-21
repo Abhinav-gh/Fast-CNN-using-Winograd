@@ -67,8 +67,11 @@
         }
 
         .matrix-container {
-            min-width: 200px;  /* Prevents layout shifting */
+            /* min-width: 200px;  Prevents layout shifting */
+            /* width:100%; */
             margin: 10px;
+            /* min-width: 10px; */
+            /* box-sizing: border-box; */
         }
 
         .matrix-container h3 {
@@ -79,22 +82,35 @@
 
         .matrix {
             display: grid;
-            gap: 2px;
-            background-color: #f0f0f0;
-            padding: 3px;
-            border-radius: 4px;
+            gap: 0 !important; /* Remove the gap between cells */
+            background-color: #f0f0f0; /* Light background for the matrix container */
+            padding: 0 !important; /* Remove extra padding around the grid */
+            border-radius: 4px; /* Optional: Rounded corners for the matrix container */
+            justify-items: center;
+            grid-template-columns: repeat(4, 1fr); /* Assuming a 4x4 matrix, adjust if necessary */
+            box-sizing: border-box; /* Ensure the border is included in the cell size */
         }
 
         .cell {
-            width: 40px;
-            height: 40px;
+            width: 40px; /* Consistent cell width */
+            height: 40px; /* Consistent cell height */
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: monospace;
-            font-size: 14px;
-            border-radius: 2px;
+            font-family: monospace; /* Monospace font for alignment */
+            font-size: 14px; /* Font size */
+            border: 1px solid #ccc; /* Border around each cell */
+            background-color: #fff; /* White background for each cell */
+            text-align: center;
+            border-radius: 2px; /* Rounded corners for cells */
+            box-sizing: border-box; /* Ensure padding and border are inside the element's width/height */
         }
+
+        .cell.active {
+            background-color: #e0e0e0; /* Highlight active cells */
+        }
+
+
 
         .input {
             background-color: #e3f2fd;
@@ -205,22 +221,22 @@
         
         <!-- Intermediate matrices for animation -->
         <div id="intermediateMatrices" class="matrix-row" style="display: none;">
-            <div class="matrix-container">
+            <div class="matrix-container input-side" >
                 <h3>B<sup>T</sup> Matrix</h3>
                 <div id="bMatrixT" class="matrix"></div>
             </div>
             
-            <div class="matrix-container">
-                <h3>B<sup>T</sup> × Input</h3>
-                <div id="interBTInput" class="matrix"></div>
+            <div class="matrix-container input-side">
+                <h3>Input × B<sup>T</sup></h3>
+                <div id="interInputBT" class="matrix"></div>
             </div>
             
-            <div class="matrix-container">
+            <div class="matrix-container filter-side">
                 <h3>G<sup>T</sup> Matrix</h3>
                 <div id="gMatrixT" class="matrix"></div>
             </div>
             
-            <div class="matrix-container">
+            <div class="matrix-container filter-side">
                 <h3>Filter × G<sup>T</sup></h3>
                 <div id="interFilterGT" class="matrix"></div>
             </div>

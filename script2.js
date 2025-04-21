@@ -34,7 +34,7 @@ const stepDescriptions = [
 
     "B matrix (4x4): Used to transform the input tile<br>G matrix (4x3): Used to transform the filter<br>A matrix (2x4): Used for the inverse transform<br><br>These matrices are carefully designed to minimize the number of multiplications needed.",
 
-    "To transform the input, we compute:<br><div class='formula'>U = B<sup>T</sup> × Input × B</div>This transforms the original input into a form that allows efficient computation.",
+    "To transform the input, we compute:<br><div class='formula'>U = B × Input × B<sup>T</sup></div>This transforms the original input into a form that allows efficient computation.",
 
     "Similarly, we transform the filter with:<br><div class='formula'>V = G × Filter × G<sup>T</sup></div>This prepares the filter for element-wise multiplication rather than traditional convolution.",
 
@@ -76,28 +76,42 @@ function createMatrixElement(rows, cols, elementId, className) {
 
 function fillMatrix(matrixData, elementId, className, randomize = false) {
     const matrixDiv = document.getElementById(elementId);
-    const cells = matrixDiv.getElementsByClassName('cell');
-    let idx = 0;
+
+    // Clear existing content
+    matrixDiv.innerHTML = '';
+
+    // Set the grid layout based on matrix column count
+    const numCols = matrixData[0].length;
+    matrixDiv.style.display = 'grid';
+    matrixDiv.style.gridTemplateColumns = `repeat(${numCols}, 1fr)`;
+    matrixDiv.style.gap = '5px';
 
     for (let i = 0; i < matrixData.length; i++) {
         for (let j = 0; j < matrixData[i].length; j++) {
+            let value = matrixData[i][j];
+
             if (randomize) {
-                // Update the data matrix with random values
                 if (className === 'input') {
-                    matrixData[i][j] = Math.floor(Math.random() * 5);
+                    value = Math.floor(Math.random() * 5);
+                    matrixData[i][j] = value;
                 } else if (className === 'filter') {
-                    matrixData[i][j] = Math.floor(Math.random() * 3);
+                    value = Math.floor(Math.random() * 3);
+                    matrixData[i][j] = value;
                 }
             }
-            if (cells[idx]) {
-                cells[idx].textContent = matrixData[i][j];
-                cells[idx].className = `cell ${className}`;
-            }
-            idx++;
+
+            const cell = document.createElement('div');
+            cell.className = `cell ${className}`;
+            // cell[idx].classList.add(className);
+            cell.textContent = value;
+            matrixDiv.appendChild(cell);
         }
     }
+
     return matrixData;
 }
+
+
 
 // Modified matrix multiplication with precision handling
 function matrixMultiply(a, b) {
@@ -155,7 +169,7 @@ function setupMatrices() {
     createMatrixElement(4, 4, 'transformedFilterMatrix', 'filter');
     
     // Create intermediate transformation matrices for animation
-    createMatrixElement(4, 4, 'interBTInput', 'transform');
+    createMatrixElement(4, 4, 'interInputBT', 'transform');
     createMatrixElement(3, 4, 'interFilterGT', 'transform');
 
     // Create element-wise product matrix
@@ -273,20 +287,46 @@ function updateStepDisplay() {
         case 2: // Transform input using B
             const BT = transpose(B);
             // const BTinput = matrixMultiply(BT, input);
-            const BTinput = matrixMultiply(B,input);
-            transformedInput = matrixMultiply(BTinput, BT);
+            // const BTinput = matrixMultiply(B,input);
+            const inputBT=matrixMultiply(input, BT);
+            transformedInput = matrixMultiply(B , inputBT);
             // Ensure these are 4x4 matrices
-            if (BTinput.length === 4 && BTinput[0].length === 4 &&
+            
+            if (inputBT.length === 4 && inputBT[0].length === 4 &&
                 transformedInput.length === 4 && transformedInput[0].length === 4) {
-                fillMatrix(BTinput, 'interBTInput', 'transform');
+                fillMatrix(inputBT, 'interInputBT', 'transform');
                 fillMatrix(transformedInput, 'transformedInputMatrix', 'input');
+                fillMatrix(BT, "bMatrixT", 'matrix');
             }
+            document.getElementById('transformMatrices').style.display = 'flex';
+            document.getElementById('transformedMatrices').style.display = 'flex';
+            // First, show the entire intermediateMatrices container (if it's hidden)
+            document.getElementById('intermediateMatrices').style.display = 'flex';
+
+            // Then, hide all child divs inside intermediateMatrices
+            const children = document.getElementById('intermediateMatrices').children;
+            for (let i = 0; i < children.length; i++) {
+                children[i].style.display = 'none';
+            }
+
+            // Finally, display only the input-side divs (all of them)
+            document.querySelectorAll('.input-side').forEach(el => {
+                el.style.display = 'block';
+            });
+            document.getElementById('animationControls').style.display = 'flex';
+
             break;
+            // show transformed input
 
         case 3: // Transform filter using G
             document.getElementById('transformMatrices').style.display = 'flex';
             document.getElementById('transformedMatrices').style.display = 'flex';
             document.getElementById('intermediateMatrices').style.display = 'flex';
+            // Show all direct children inside #intermediateMatrices
+            const allChildren = document.getElementById('intermediateMatrices').children;
+            for (let i = 0; i < allChildren.length; i++) {
+                allChildren[i].style.display = 'block';
+            }
             document.getElementById('animationControls').style.display = 'flex';
 
             // Keep showing transformed input
@@ -353,6 +393,7 @@ function updateStepDisplay() {
 }
 
 function startTransformationAnimation() {
+
     if (transformationActive) {
         clearInterval(transformationInterval);
         transformationActive = false;
@@ -385,7 +426,7 @@ function animateInputTransformation() {
     const inputCells = document.getElementById('inputMatrix').getElementsByClassName('cell');
     const btCells = document.getElementById('bMatrixT').getElementsByClassName('cell');
     const bCells = document.getElementById('bMatrix').getElementsByClassName('cell');
-    const intermediateCells = document.getElementById('interBTInput').getElementsByClassName('cell');
+    const intermediateCells = document.getElementById('interInputBT').getElementsByClassName('cell');
     const resultCells = document.getElementById('transformedInputMatrix').getElementsByClassName('cell');
     
     // Reset all highlights
@@ -395,15 +436,15 @@ function animateInputTransformation() {
     Array.from(intermediateCells).forEach(cell => cell.classList.remove('active'));
     Array.from(resultCells).forEach(cell => cell.classList.remove('active'));
     
-    const BTinput = matrixMultiply(BT, input);
-    const transformedInput = matrixMultiply(BTinput, B);
+    const inputBT = matrixMultiply(input, BT);
+    const transformedInput = matrixMultiply(B, inputBT);
     
-    let animPhase = 0; // 0: BT*input, 1: (BT*input)*B
+    let animPhase = 0; // 0: Bᵀ * input, 1: (Bᵀ * input) * B
     let currentRow = 0;
     let currentCol = 0;
     
     transformationAnimationStep = 0;
-    document.getElementById('transformationStatus').textContent = 'Animating BᵀX calculation...';
+    document.getElementById('transformationStatus').textContent = 'Animating Bᵀ * input calculation...';
     
     clearInterval(transformationInterval);
     transformationInterval = setInterval(() => {
@@ -417,6 +458,7 @@ function animateInputTransformation() {
         Array.from(resultCells).forEach(cell => cell.classList.remove('active'));
         
         if (animPhase === 0) {
+            // Highlight cells during the first phase (Bᵀ * input)
             for (let k = 0; k < 4; k++) {
                 const btCellIndex = currentRow * 4 + k;
                 if (btCells[btCellIndex]) btCells[btCellIndex].classList.add('active');
@@ -426,7 +468,21 @@ function animateInputTransformation() {
             }
             const intermediateIndex = currentRow * 4 + currentCol;
             if (intermediateCells[intermediateIndex]) intermediateCells[intermediateIndex].classList.add('active');
-        } else { // (BT*input)*B calculation
+            
+            currentCol++;
+            if (currentCol >= 4) {
+                currentCol = 0;
+                currentRow++;
+                if (currentRow >= 4) {
+                    // Move to the next phase after completing the first
+                    animPhase = 1; 
+                    currentRow = 0; // reset row index
+                    currentCol = 0; // reset column index
+                    document.getElementById('transformationStatus').textContent = 'Animating (Bᵀ * input) * B calculation...';
+                }
+            }
+        } else if (animPhase === 1) {
+            // Highlight cells during the second phase ((Bᵀ * input) * B)
             // Highlight current intermediate row
             for (let k = 0; k < 4; k++) {
                 intermediateCells[currentRow * 4 + k].classList.add('active');
@@ -448,7 +504,8 @@ function animateInputTransformation() {
                     document.getElementById('animateBtn').textContent = 'Animate Again';
                     
                     // Show all results
-                    fillMatrix(BTinput, 'interBTInput', 'transform');
+                    fillMatrix(BT, 'bMatrixT', 'transform');
+                    fillMatrix(inputBT, 'interInputBT', 'transform');
                     fillMatrix(transformedInput, 'transformedInputMatrix', 'input');
                 }
             }
@@ -457,6 +514,7 @@ function animateInputTransformation() {
         transformationAnimationStep++;
     }, 500);
 }
+
 
 function animateFilterTransformation() {
     const GT = transpose(G);
@@ -847,7 +905,7 @@ function generateVisualizationHTML() {
             
             <div class="matrix-container">
                 <h3>B<sup>T</sup> × Input</h3>
-                <div id="interBTInput" class="matrix"></div>
+                <div id="interInputBT" class="matrix"></div>
             </div>
             
             <div class="matrix-container">
