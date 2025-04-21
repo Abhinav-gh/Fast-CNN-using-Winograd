@@ -201,6 +201,68 @@
             vertical-align: top;
             margin-right: 15px;
         }
+        
+        /* New styles for the diagram in the bottom right */
+        /* Updated diagram container size */
+        .diagram-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 450px; /* Increased from 250px */
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            z-index: 1000;
+        }
+
+        /* You can also adjust the padding if needed */
+        .diagram-content {
+            text-align: center;
+            padding: 5px;
+        }
+
+        /* Ensure image scales properly within the larger container */
+        .diagram-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 3px;
+        }
+        
+        .diagram-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .diagram-title {
+            font-weight: bold;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .close-btn {
+            cursor: pointer;
+            font-size: 18px;
+            color: #999;
+        }
+        
+        .close-btn:hover {
+            color: #333;
+        }
+        
+        .diagram-content {
+            text-align: center;
+        }
+        
+        .diagram-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 3px;
+        }
     </style>
 </head>
 <body>
@@ -422,6 +484,29 @@
         </div>
     </div>
     
+    <!-- Winograd Diagram Container -->
+    <div class="diagram-container">
+        <div class="diagram-header">
+            <div class="diagram-title">Winograd Convolution Flow</div>
+            <div class="close-btn" onclick="toggleDiagram()">×</div>
+        </div>
+        <div class="diagram-content">
+            <!-- Replace with your actual diagram image -->
+            <img src="winograd-diagram.png" alt="Winograd Convolution Flow">
+        </div>
+    </div>
+    
     <script src="script3.js"></script>
+    <script>
+        // Function to toggle the diagram visibility
+        function toggleDiagram() {
+            const diagram = document.querySelector('.diagram-container');
+            if (diagram.style.display === 'none') {
+                diagram.style.display = 'block';
+            } else {
+                diagram.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>
